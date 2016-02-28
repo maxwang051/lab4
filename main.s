@@ -86,6 +86,20 @@ Start BL   TExaS_Init  ; running at 80 MHz, scope voltmeter on PD3
 	ORR R1, #0x03
 	STR R1, [R0]
 ; initialize Port F
+	LDR R0, =GPIO_PORTF_DIR_R
+	LDR R1, [R0]
+	ORR R1, #0x04
+	STR R1, [R0]
+	
+	LDR R0, =GPIO_PORTF_AFSEL_R
+	LDR R1, [R0]
+	BIC R1, #0x04
+	STR R1, [R0]
+	
+	LDR R0, =GPIO_PORTF_DEN_R
+	LDR R1, [R0]
+	ORR R1, #0x04
+	STR R1, [R0]
 ; initialize debugging dump, including SysTick
 
 
