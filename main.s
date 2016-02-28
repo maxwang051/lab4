@@ -22,6 +22,7 @@
 ;   5) Steps 3 and 4 are repeated over and over
 
 
+
 SWITCH              	EQU 0x40024008  ;PE1
 LED                 	EQU 0x40024004  ;PE0
 SYSCTL_RCGCGPIO_R       EQU 0x400FE608
@@ -118,9 +119,33 @@ loop  BL   Debug_Capture
 ; Modifies: none
 ; Note: push/pop an even number of registers so C compiler is happy
 Debug_Init
+; set buffers to 0xFFFFFFFF
+; initialize pointers
+	LDR R0, =DataPt					; get address of data pointer
+	LDR R1, =DataBuffer				; get address of first element
+	STR R1, [R0]					; store address of first element in pointer
+	
+	LDR R0, =TimePt
+	LDR R1, =TimeBuffer
+	STR R1, [R0]					
       
 ; init SysTick
-
+	; disable SysTick during setup
+    LDR R1, =NVIC_ST_CTRL_R         ; R1 = &NVIC_ST_CTRL_R
+    MOV R0, #0                      ; R0 = 0
+    STR R0, [R1]                    ; [R1] = R0 = 0
+    ; maximum reload value
+    LDR R1, =NVIC_ST_RELOAD_R       ; R1 = &NVIC_ST_RELOAD_R
+    LDR R0, =0x00FFFFFF       ; R0 = NVIC_ST_RELOAD_M
+    STR R0, [R1]                    ; [R1] = R0 = NVIC_ST_RELOAD_M
+    ; any write to current clears it
+    LDR R1, =NVIC_ST_CURRENT_R      ; R1 = &NVIC_ST_CURRENT_R
+    MOV R0, #0                      ; R0 = 0
+    STR R0, [R1]                    ; [R1] = R0 = 0
+    ; enable SysTick with core clock
+    LDR R1, =NVIC_ST_CTRL_R         ; R1 = &NVIC_ST_CTRL_R
+	MOV R0, #0x05
+    STR R0, [R1]                    ; [R1] = R0 = (NVIC_ST_CTRL_ENABLE|NVIC_ST_CTRL_CLK_SRC)
       BX LR
 
 ;------------Debug_Capture------------
