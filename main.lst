@@ -274,134 +274,147 @@ ARM Macro Assembler    Page 5
                        Start   BL               TExaS_Init  ; running at 80 MHz
                                                             , scope voltmeter o
                                                             n PD3
-   67 00000004 4820            LDR              R0, =SYSCTL_RCGCGPIO_R
+   67 00000004 482A            LDR              R0, =SYSCTL_RCGCGPIO_R
    68 00000006 6801            LDR              R1, [R0]
    69 00000008 F041 0130       ORR              R1, #0x30
    70 0000000C 6001            STR              R1, [R0]
    71 0000000E BF00            NOP
    72 00000010 BF00            NOP
    73 00000012         ; initialize Port E
-   74 00000012 481E            LDR              R0, =GPIO_PORTE_DIR_R
+   74 00000012 4828            LDR              R0, =GPIO_PORTE_DIR_R
    75 00000014 6801            LDR              R1, [R0]
    76 00000016 F041 0101       ORR              R1, #0x01
    77 0000001A F021 0102       BIC              R1, #0x02
    78 0000001E 6001            STR              R1, [R0]
    79 00000020         
-   80 00000020 481B            LDR              R0, =GPIO_PORTE_AFSEL_R
+   80 00000020 4825            LDR              R0, =GPIO_PORTE_AFSEL_R
    81 00000022 6801            LDR              R1, [R0]
    82 00000024 F021 0103       BIC              R1, #0x03
    83 00000028 6001            STR              R1, [R0]
    84 0000002A         
-   85 0000002A 481A            LDR              R0, =GPIO_PORTE_DEN_R
+   85 0000002A 4824            LDR              R0, =GPIO_PORTE_DEN_R
    86 0000002C 6801            LDR              R1, [R0]
    87 0000002E F041 0103       ORR              R1, #0x03
    88 00000032 6001            STR              R1, [R0]
    89 00000034         ; initialize Port F
-   90 00000034 4818            LDR              R0, =GPIO_PORTF_DIR_R
+   90 00000034 4822            LDR              R0, =GPIO_PORTF_DIR_R
    91 00000036 6801            LDR              R1, [R0]
    92 00000038 F041 0104       ORR              R1, #0x04
    93 0000003C 6001            STR              R1, [R0]
    94 0000003E         
-   95 0000003E 4817            LDR              R0, =GPIO_PORTF_AFSEL_R
+   95 0000003E 4821            LDR              R0, =GPIO_PORTF_AFSEL_R
    96 00000040 6801            LDR              R1, [R0]
    97 00000042 F021 0104       BIC              R1, #0x04
    98 00000046 6001            STR              R1, [R0]
    99 00000048         
-  100 00000048 4815            LDR              R0, =GPIO_PORTF_DEN_R
+  100 00000048 481F            LDR              R0, =GPIO_PORTF_DEN_R
   101 0000004A 6801            LDR              R1, [R0]
   102 0000004C F041 0104       ORR              R1, #0x04
   103 00000050 6001            STR              R1, [R0]
   104 00000052         ; initialize debugging dump, including SysTick
-  105 00000052         
-  106 00000052         
-  107 00000052 B662            CPSIE            I           ; TExaS voltmeter, 
+  105 00000052 F000 F804       BL               Debug_Init
+  106 00000056         
+  107 00000056 B662            CPSIE            I           ; TExaS voltmeter, 
                                                             scope runs on inter
                                                             rupts
-  108 00000054 F000 F817 
+  108 00000058 F000 F828 
                        loop    BL               Debug_Capture
-  109 00000058         ;heartbeat
-  110 00000058         ; Delay
-  111 00000058         ;input PE1 test output PE0
-  112 00000058 E7FC            B                loop
+  109 0000005C         ;heartbeat
+  110 0000005C         ; Delay
+  111 0000005C         ;input PE1 test output PE0
+  112 0000005C E7FC            B                loop
 
 
 
 ARM Macro Assembler    Page 6 
 
 
-  113 0000005A         
-  114 0000005A         
-  115 0000005A         ;------------Debug_Init------------
-  116 0000005A         ; Initializes the debugging instrument
-  117 0000005A         ; Input: none
-  118 0000005A         ; Output: none
-  119 0000005A         ; Modifies: none
-  120 0000005A         ; Note: push/pop an even number of registers so C compil
+  113 0000005E         
+  114 0000005E         
+  115 0000005E         ;------------Debug_Init------------
+  116 0000005E         ; Initializes the debugging instrument
+  117 0000005E         ; Input: none
+  118 0000005E         ; Output: none
+  119 0000005E         ; Modifies: none
+  120 0000005E         ; Note: push/pop an even number of registers so C compil
                        er is happy
-  121 0000005A         Debug_Init
-  122 0000005A         ; set buffers to 0xFFFFFFFF
-  123 0000005A         ; initialize pointers
-  124 0000005A 4812            LDR              R0, =DataPt ; get address of da
+  121 0000005E         Debug_Init
+  122 0000005E         ; set buffers to 0xFFFFFFFF 
+  123 0000005E F04F 0032       MOV              R0, #50
+  124 00000062 491A            LDR              R1, =DataBuffer
+  125 00000064 4A1A            LDR              R2, =TimeBuffer
+  126 00000066 F04F 33FF       MOV              R3, #0xFFFFFFFF
+  127 0000006A 2800    lp      CMP              R0, #0
+  128 0000006C D008            BEQ              L1
+  129 0000006E 600B            STR              R3, [R1]
+  130 00000070 6013            STR              R3, [R2]
+  131 00000072 F101 0104       ADD              R1, #4
+  132 00000076 F102 0204       ADD              R2, #4
+  133 0000007A F1A0 0001       SUB              R0, #1
+  134 0000007E E7F4            B                lp
+  135 00000080         
+  136 00000080         ; initialize pointers
+  137 00000080 4814    L1      LDR              R0, =DataPt ; get address of da
                                                             ta pointer
-  125 0000005C 4912            LDR              R1, =DataBuffer ; get address o
+  138 00000082 4912            LDR              R1, =DataBuffer ; get address o
                                                             f first element
-  126 0000005E 6001            STR              R1, [R0]    ; store address of 
+  139 00000084 6001            STR              R1, [R0]    ; store address of 
                                                             first element in po
                                                             inter
-  127 00000060         
-  128 00000060 4812            LDR              R0, =TimePt
-  129 00000062 4913            LDR              R1, =TimeBuffer
-  130 00000064 6001            STR              R1, [R0]
-  131 00000066         
-  132 00000066         ; init SysTick
-  133 00000066         ; disable SysTick during setup
-  134 00000066 4913            LDR              R1, =NVIC_ST_CTRL_R ; R1 = &NVI
+  140 00000086         
+  141 00000086 4814            LDR              R0, =TimePt
+  142 00000088 4911            LDR              R1, =TimeBuffer
+  143 0000008A 6001            STR              R1, [R0]
+  144 0000008C         
+  145 0000008C         ; init SysTick
+  146 0000008C         ; disable SysTick during setup
+  147 0000008C 4913            LDR              R1, =NVIC_ST_CTRL_R ; R1 = &NVI
                                                             C_ST_CTRL_R
-  135 00000068 F04F 0000       MOV              R0, #0      ; R0 = 0
-  136 0000006C 6008            STR              R0, [R1]    ; [R1] = R0 = 0
-  137 0000006E         ; maximum reload value
-  138 0000006E 4912            LDR              R1, =NVIC_ST_RELOAD_R ; R1 = &N
+  148 0000008E F04F 0000       MOV              R0, #0      ; R0 = 0
+  149 00000092 6008            STR              R0, [R1]    ; [R1] = R0 = 0
+  150 00000094         ; maximum reload value
+  151 00000094 4912            LDR              R1, =NVIC_ST_RELOAD_R ; R1 = &N
                                                             VIC_ST_RELOAD_R
-  139 00000070 4812            LDR              R0, =0x00FFFFFF ; R0 = NVIC_ST_
+  152 00000096 4813            LDR              R0, =0x00FFFFFF ; R0 = NVIC_ST_
                                                             RELOAD_M
-  140 00000072 6008            STR              R0, [R1]    ; [R1] = R0 = NVIC_
+  153 00000098 6008            STR              R0, [R1]    ; [R1] = R0 = NVIC_
                                                             ST_RELOAD_M
-  141 00000074         ; any write to current clears it
-  142 00000074 4912            LDR              R1, =NVIC_ST_CURRENT_R ; R1 = &
+  154 0000009A         ; any write to current clears it
+  155 0000009A 4913            LDR              R1, =NVIC_ST_CURRENT_R ; R1 = &
                                                             NVIC_ST_CURRENT_R
-  143 00000076 F04F 0000       MOV              R0, #0      ; R0 = 0
-  144 0000007A 6008            STR              R0, [R1]    ; [R1] = R0 = 0
-  145 0000007C         ; enable SysTick with core clock
-  146 0000007C 490D            LDR              R1, =NVIC_ST_CTRL_R ; R1 = &NVI
+  156 0000009C F04F 0000       MOV              R0, #0      ; R0 = 0
+  157 000000A0 6008            STR              R0, [R1]    ; [R1] = R0 = 0
+  158 000000A2         ; enable SysTick with core clock
+  159 000000A2 490E            LDR              R1, =NVIC_ST_CTRL_R ; R1 = &NVI
                                                             C_ST_CTRL_R
-  147 0000007E F04F 0005       MOV              R0, #0x05
-  148 00000082 6008            STR              R0, [R1]    ; [R1] = R0 = (NVIC
-                                                            _ST_CTRL_ENABLE|NVI
-                                                            C_ST_CTRL_CLK_SRC)
-  149 00000084 4770            BX               LR
-  150 00000086         
-  151 00000086         ;------------Debug_Capture------------
-  152 00000086         ; Dump Port E and time into buffers
-  153 00000086         ; Input: none
-  154 00000086         ; Output: none
-  155 00000086         ; Modifies: none
-  156 00000086         ; Note: push/pop an even number of registers so C compil
-                       er is happy
-  157 00000086         Debug_Capture
+  160 000000A4 F04F 0005       MOV              R0, #0x05
 
 
 
 ARM Macro Assembler    Page 7 
 
 
-  158 00000086         
-  159 00000086 4770            BX               LR
-  160 00000088         
-  161 00000088         
-  162 00000088                 ALIGN                        ; make sure the end
+  161 000000A8 6008            STR              R0, [R1]    ; [R1] = R0 = (NVIC
+                                                            _ST_CTRL_ENABLE|NVI
+                                                            C_ST_CTRL_CLK_SRC)
+  162 000000AA 4770            BX               LR
+  163 000000AC         
+  164 000000AC         ;------------Debug_Capture------------
+  165 000000AC         ; Dump Port E and time into buffers
+  166 000000AC         ; Input: none
+  167 000000AC         ; Output: none
+  168 000000AC         ; Modifies: none
+  169 000000AC         ; Note: push/pop an even number of registers so C compil
+                       er is happy
+  170 000000AC         Debug_Capture
+  171 000000AC         
+  172 000000AC 4770            BX               LR
+  173 000000AE         
+  174 000000AE         
+  175 000000AE 00 00           ALIGN                        ; make sure the end
                                                              of this section is
                                                              aligned
-  163 00000088                 END                          ; end of file
+  176 000000B0                 END                          ; end of file
               400FE608 
               40024400 
               40024420 
@@ -442,7 +455,8 @@ Symbol: DataBuffer
       At line 53 in file main.s
    Uses
       At line 49 in file main.s
-      At line 125 in file main.s
+      At line 124 in file main.s
+      At line 138 in file main.s
 
 DataPt 00000190
 
@@ -451,7 +465,7 @@ Symbol: DataPt
       At line 55 in file main.s
    Uses
       At line 51 in file main.s
-      At line 124 in file main.s
+      At line 137 in file main.s
 
 TimeBuffer 000000C8
 
@@ -460,7 +474,8 @@ Symbol: TimeBuffer
       At line 54 in file main.s
    Uses
       At line 50 in file main.s
-      At line 129 in file main.s
+      At line 125 in file main.s
+      At line 142 in file main.s
 
 TimePt 00000194
 
@@ -469,7 +484,7 @@ Symbol: TimePt
       At line 56 in file main.s
    Uses
       At line 52 in file main.s
-      At line 128 in file main.s
+      At line 141 in file main.s
 
 5 symbols
 
@@ -486,22 +501,30 @@ Symbol: .text
    Uses
       None
 Comment: .text unused
-Debug_Capture 00000086
+Debug_Capture 000000AC
 
 Symbol: Debug_Capture
    Definitions
-      At line 157 in file main.s
+      At line 170 in file main.s
    Uses
       At line 108 in file main.s
 Comment: Debug_Capture used once
-Debug_Init 0000005A
+Debug_Init 0000005E
 
 Symbol: Debug_Init
    Definitions
       At line 121 in file main.s
    Uses
-      None
-Comment: Debug_Init unused
+      At line 105 in file main.s
+Comment: Debug_Init used once
+L1 00000080
+
+Symbol: L1
+   Definitions
+      At line 137 in file main.s
+   Uses
+      At line 128 in file main.s
+Comment: L1 used once
 Start 00000000
 
 Symbol: Start
@@ -510,7 +533,7 @@ Symbol: Start
    Uses
       At line 62 in file main.s
 Comment: Start used once
-loop 00000054
+loop 00000058
 
 Symbol: loop
    Definitions
@@ -518,7 +541,15 @@ Symbol: loop
    Uses
       At line 112 in file main.s
 Comment: loop used once
-5 symbols
+lp 0000006A
+
+Symbol: lp
+   Definitions
+      At line 127 in file main.s
+   Uses
+      At line 134 in file main.s
+Comment: lp used once
+7 symbols
 
 
 
@@ -617,8 +648,8 @@ Symbol: NVIC_ST_CTRL_R
    Definitions
       At line 40 in file main.s
    Uses
-      At line 134 in file main.s
-      At line 146 in file main.s
+      At line 147 in file main.s
+      At line 159 in file main.s
 
 NVIC_ST_CURRENT_R E000E018
 
@@ -626,7 +657,7 @@ Symbol: NVIC_ST_CURRENT_R
    Definitions
       At line 42 in file main.s
    Uses
-      At line 142 in file main.s
+      At line 155 in file main.s
 Comment: NVIC_ST_CURRENT_R used once
 NVIC_ST_RELOAD_R E000E014
 
@@ -634,7 +665,7 @@ Symbol: NVIC_ST_RELOAD_R
    Definitions
       At line 41 in file main.s
    Uses
-      At line 138 in file main.s
+      At line 151 in file main.s
 Comment: NVIC_ST_RELOAD_R used once
 SIZE 00000032
 
@@ -699,4 +730,4 @@ Symbol: TExaS_Init
       At line 66 in file main.s
 Comment: TExaS_Init used once
 1 symbol
-363 symbols in table
+365 symbols in table

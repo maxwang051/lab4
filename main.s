@@ -102,7 +102,7 @@ Start BL   TExaS_Init  ; running at 80 MHz, scope voltmeter on PD3
 	ORR R1, #0x04
 	STR R1, [R0]
 ; initialize debugging dump, including SysTick
-
+	BL Debug_Init
 
       CPSIE  I    ; TExaS voltmeter, scope runs on interrupts
 loop  BL   Debug_Capture
@@ -119,9 +119,22 @@ loop  BL   Debug_Capture
 ; Modifies: none
 ; Note: push/pop an even number of registers so C compiler is happy
 Debug_Init
-; set buffers to 0xFFFFFFFF
+; set buffers to 0xFFFFFFFF	
+	MOV R0, #50
+	LDR R1, =DataBuffer
+	LDR R2, =TimeBuffer
+	MOV R3, #0xFFFFFFFF
+lp	CMP R0, #0
+	BEQ L1
+	STR R3, [R1]
+	STR R3, [R2]
+	ADD R1, #4
+	ADD R2, #4
+	SUB R0, #1
+	B lp
+
 ; initialize pointers
-	LDR R0, =DataPt					; get address of data pointer
+L1	LDR R0, =DataPt					; get address of data pointer
 	LDR R1, =DataBuffer				; get address of first element
 	STR R1, [R0]					; store address of first element in pointer
 	
