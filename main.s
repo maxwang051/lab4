@@ -111,7 +111,7 @@ Start BL   TExaS_Init  ; running at 80 MHz, scope voltmeter on PD3
 	ORR R1, #0x01
 	STR R1, [R0]
 	 
-loop  							; Debug_Capture takes 0.00001% of total time
+loop  							; Debug_Capture takes 0.001% of total time
 	BL   Debug_Capture
 ; toggle led if switch is on
 	LDR R0, =GPIO_PORTE_DATA_R
@@ -125,6 +125,11 @@ loop  							; Debug_Capture takes 0.00001% of total time
 switch_on
 	EOR R1, #0x01
 done
+	STR R1, [R0]
+	
+	LDR R0, =GPIO_PORTF_DATA_R
+	LDR R1, [R0]
+	EOR R1, #0x04
 	STR R1, [R0]
 
 ;heartbeat
