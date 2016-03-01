@@ -103,7 +103,7 @@ Start BL   TExaS_Init  ; running at 80 MHz, scope voltmeter on PD3
 	ORR R1, #0x04
 	STR R1, [R0]
 ; initialize debugging dump, including SysTick
-	BL Debug_Init
+	BL Debug_Init 				; initialize buffers, buffer pointers, and enable systick
 
       CPSIE  I    ; TExaS voltmeter, scope runs on interrupts - GETS STUCK HERE WHY???????????????????
 loop  BL   Debug_Capture
@@ -125,27 +125,27 @@ again
 ; Note: push/pop an even number of registers so C compiler is happy
 Debug_Init
 ; set buffers to 0xFFFFFFFF	
-	MOV R0, #50
-	LDR R1, =DataBuffer
-	LDR R2, =TimeBuffer
-	MOV R3, #0xFFFFFFFF
-lp	CMP R0, #0
-	BEQ L1
-	STR R3, [R1]
-	STR R3, [R2]
-	ADD R1, #4
-	ADD R2, #4
-	SUB R0, #1
-	B lp
+	MOV R0, #50						; set count equal to number of elements in array
+	LDR R1, =DataBuffer				; R1 <- starting address of data array
+	LDR R2, =TimeBuffer				; R2 <- starting address of time array
+	MOV R3, #0xFFFFFFFF				; R3 <- data we'll be storing
+lp	CMP R0, #0						; reached end of array?
+	BEQ L1							; if yes, end loop
+	STR R3, [R1]					; otherwise store the data into the address held by R1 (current DATA array address)
+	STR R3, [R2]					; store the data into the address held by R2 (current TIME array address)
+	ADD R1, #4						; increment data array pointer to next element
+	ADD R2, #4						; increment time array pointer to next element
+	SUB R0, #1						; subtract 1 from count
+	B lp	
 
 ; initialize pointers
 L1	LDR R0, =DataPt					; get address of data pointer
 	LDR R1, =DataBuffer				; get address of first element
-	STR R1, [R0]					; store address of first element in pointer
+	STR R1, [R0]					; store address of first element in pointer address
 	
-	LDR R0, =TimePt
-	LDR R1, =TimeBuffer
-	STR R1, [R0]					
+	LDR R0, =TimePt					; get address of time pointer
+	LDR R1, =TimeBuffer				; get address of first element
+	STR R1, [R0]					; store address of first element in pointer address
       
 ; init SysTick
 	; disable SysTick during setup
@@ -173,32 +173,33 @@ L1	LDR R0, =DataPt					; get address of data pointer
 ; Modifies: none
 ; Note: push/pop an even number of registers so C compiler is happy
 Debug_Capture
-	PUSH [R0, R1, R2, R3, R12]
-	LDR R0, =DataPt
-	LDR R1, =TimePt
-	LDR R2, =TimeBuffer
-	ADD R2, #200
-	CMP R1, R2
-	BGT L2
+	PUSH {R0, R1, R2, R3, R4, R12}	; push needed registers to stack (R4 not needed but has to be even number of registers)
+	LDR R0, =DataPt					; R0 <- data array pointer to first element
+	LDR R1, =TimePt					; R1 <- time array pointer to first element
+lp2	LDR R2, =TimeBuffer				; R2 <- starting address of array
+	ADD R2, #200					; add 50 to get the ending address of the array
+	CMP R1, R2						; check to see if we have gone past the bounds of the array
+	BGT L2							; if yes then return
 	
-	LDR R2, =GPIO_PORTE_DATA_R
-	LDR R3, [R2]
-	BIC R3, #0xFC
-	MOV R12, R3
-	BIC R12, #0x01
-	LSL R12, #3
-	ORR R3, R12, R3
-	BIC R3, #0xEE
-	STR R3, [R0]
+	LDR R2, =GPIO_PORTE_DATA_R		; R2 <- PORT E data address
+	LDR R3, [R2]					; R3 <- PORT E data
+	BIC R3, #0xFC					; mask everything except PE0 and PE1
+	MOV R12, R3						; create a copy of the data into R12
+	BIC R12, #0x01					; clear everything but PE1
+	LSL R12, #3						; shift PE1 by 3 bits
+	ORR R3, R12, R3					; store the result back into R3
+	BIC R3, #0xEE					; get rid of the original PE1 that was in bit 1
+	STR R3, [R0]					; store data into data array
 	
-	LDR R2, =NVIC_ST_CURRENT_R
-	LDR R3, [R2]
-	STR R3, [R1]
+	LDR R2, =NVIC_ST_CURRENT_R		; R2 <- current clock time address
+	LDR R3, [R2]					; R3 <- current clock time
+	STR R3, [R1]					; store current time into the time array - hopefully - not sure this works
 	
-	ADD R0, #4
+	ADD R0, #4						; increment the pointers to the next element in the array
 	ADD R1, #4
+	B lp2							; loop
 	
-	POP [R0, R1, R2, R3, R12]
+	POP {R0, R1, R2, R3, R4, R12}
 	
 
 L2    BX LR
