@@ -40,7 +40,7 @@ GPIO_PORTF_DEN_R        EQU 0x4002551C
 NVIC_ST_CTRL_R          EQU 0xE000E010
 NVIC_ST_RELOAD_R        EQU 0xE000E014
 NVIC_ST_CURRENT_R       EQU 0xE000E018
-COUNT					EQU 0x0003C8C0
+COUNT					EQU 0x001312D0
            THUMB
            AREA    DATA, ALIGN=4
 SIZE       EQU    50
@@ -116,8 +116,9 @@ loop
 ; toggle led if switch is on
 	LDR R0, =GPIO_PORTE_DATA_R
 	LDR R1, [R0]
-	BIC R1, #0x02				; isolate switch bit (PE1)
-	CMP R1, #0
+	MOV R2, R1
+	BIC R2, #0xFD				; isolate switch bit (PE1)
+	CMP R2, #0
 	BNE switch_on
 	ORR R1, #0x01
 	B done
@@ -224,7 +225,7 @@ Debug_Capture
 	POP {R0, R1, R2, R3, R4, R5, R6, R12}
 	
 
-L2    BX LR
+L2    BX LR 						; debug_capture - 25 lines or 50 cycles - 6.25 * 10^-7 seconds
 
 
     ALIGN                           ; make sure the end of this section is aligned
