@@ -105,7 +105,7 @@ Start BL   TExaS_Init  ; running at 80 MHz, scope voltmeter on PD3
 ; initialize debugging dump, including SysTick
 	BL Debug_Init
 
-      CPSIE  I    ; TExaS voltmeter, scope runs on interrupts
+      CPSIE  I    ; TExaS voltmeter, scope runs on interrupts - GETS STUCK HERE WHY???????????????????
 loop  BL   Debug_Capture
 ;heartbeat
 ; Delay
