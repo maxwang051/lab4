@@ -105,8 +105,27 @@ Start BL   TExaS_Init  ; running at 80 MHz, scope voltmeter on PD3
 ; initialize debugging dump, including SysTick
 	BL Debug_Init 				; initialize buffers, buffer pointers, and enable systick
 
-      CPSIE  I    ; TExaS voltmeter, scope runs on interrupts - GETS STUCK HERE WHY???????????????????
-loop  BL   Debug_Capture
+      CPSIE  I    ; TExaS voltmeter, scope runs on interrupts
+	LDR R0, =GPIO_PORTE_DATA_R
+	LDR R1, [R0] 				; turn on the LED initially
+	ORR R1, #0x01
+	STR R1, [R0]
+	 
+loop  	
+	BL   Debug_Capture
+; toggle led if switch is on
+	LDR R0, =GPIO_PORTE_DATA_R
+	LDR R1, [R0]
+	BIC R1, #0x02				; isolate switch bit (PE1)
+	CMP R1, #0
+	BNE switch_on
+	ORR R1, #0x01
+	B done
+switch_on
+	EOR R1, #0x01
+done
+	STR R1, [R0]
+
 ;heartbeat
 ; Delay
 	LDR R0, =COUNT
