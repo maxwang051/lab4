@@ -174,8 +174,8 @@ L1	LDR R0, =DataPt					; get address of data pointer
 ; Note: push/pop an even number of registers so C compiler is happy
 Debug_Capture
 	PUSH {R0, R1, R2, R3, R4, R12}	; push needed registers to stack (R4 not needed but has to be even number of registers)
-	LDR R0, =DataPt					; R0 <- address of data array pointer to element
-	LDR R1, =TimePt					; R1 <- address of time array pointer to element
+	LDR R0, =DataPt					; R0 <- data array pointer to element
+	LDR R1, =TimePt					; R1 <- time array pointer to element
 	LDR R2, [R0]					; R2 <- data array pointer to element
 	LDR R3, [R1]					; R3 <- time array pointer to element
 	LDR R4, =TimeBuffer				; R4 <- starting address of array
