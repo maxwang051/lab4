@@ -174,11 +174,13 @@ L1	LDR R0, =DataPt					; get address of data pointer
 ; Note: push/pop an even number of registers so C compiler is happy
 Debug_Capture
 	PUSH {R0, R1, R2, R3, R4, R12}	; push needed registers to stack (R4 not needed but has to be even number of registers)
-	LDR R0, =DataPt					; R0 <- data array pointer to first element
-	LDR R1, =TimePt					; R1 <- time array pointer to first element
-lp2	LDR R2, =TimeBuffer				; R2 <- starting address of array
-	ADD R2, #200					; add 50 to get the ending address of the array
-	CMP R1, R2						; check to see if we have gone past the bounds of the array
+	LDR R0, =DataPt					; R0 <- address of data array pointer to element
+	LDR R1, =TimePt					; R1 <- address of time array pointer to element
+	LDR R2, [R0]					; R2 <- data array pointer to element
+	LDR R3, [R1]					; R3 <- time array pointer to element
+	LDR R4, =TimeBuffer				; R4 <- starting address of array
+	ADD R4, #200					; add 50 to get the ending address of the array
+	CMP R3, R4						; check to see if we have gone past the bounds of the array
 	BGT L2							; if yes then return
 	
 	LDR R2, =GPIO_PORTE_DATA_R		; R2 <- PORT E data address
@@ -195,9 +197,10 @@ lp2	LDR R2, =TimeBuffer				; R2 <- starting address of array
 	LDR R3, [R2]					; R3 <- current clock time
 	STR R3, [R1]					; store current time into the time array - hopefully - not sure this works
 	
-	ADD R0, #4						; increment the pointers to the next element in the array
-	ADD R1, #4
-	B lp2							; loop
+	ADD R2, #4						; increment pointers 
+	ADD R3, #4
+	STR R2, [R0]					; store updated pointers back into the variables
+	STR R3, [R1]
 	
 	POP {R0, R1, R2, R3, R4, R12}
 	
