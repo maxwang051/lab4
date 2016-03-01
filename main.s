@@ -112,7 +112,7 @@ Start BL   TExaS_Init  ; running at 80 MHz, scope voltmeter on PD3
 	STR R1, [R0]
 	 
 loop  							; Debug_Capture takes 0.001% of total time
-	BL   Debug_Capture
+	
 ; toggle led if switch is on
 	LDR R0, =GPIO_PORTE_DATA_R
 	LDR R1, [R0]
@@ -126,6 +126,8 @@ switch_on
 	EOR R1, #0x01
 done
 	STR R1, [R0]
+	
+	BL   Debug_Capture
 	
 	LDR R0, =GPIO_PORTF_DATA_R
 	LDR R1, [R0]
@@ -206,7 +208,7 @@ Debug_Capture
 	LDR R4, =TimeBuffer				; R4 <- starting address of array
 	ADD R4, #200					; add 50 to get the ending address of the array
 	CMP R3, R4						; check to see if we have gone past the bounds of the array
-	BGT L2							; if yes then return
+	BEQ L2							; if yes then return
 	
 	LDR R4, =GPIO_PORTE_DATA_R		; R4 <- PORT E data address
 	LDR R5, [R4]					; R5 <- PORT E data

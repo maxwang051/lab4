@@ -337,144 +337,146 @@ ARM Macro Assembler    Page 6
   114 00000062         loop                                 ; Debug_Capture tak
                                                             es 0.001% of total 
                                                             time
-  115 00000062 F000 F83D       BL               Debug_Capture
-  116 00000066         ; toggle led if switch is on
-  117 00000066 4838            LDR              R0, =GPIO_PORTE_DATA_R
-  118 00000068 6801            LDR              R1, [R0]
-  119 0000006A 460A            MOV              R2, R1
-  120 0000006C F022 02FD       BIC              R2, #0xFD   ; isolate switch bi
+  115 00000062         
+  116 00000062         ; toggle led if switch is on
+  117 00000062 4839            LDR              R0, =GPIO_PORTE_DATA_R
+  118 00000064 6801            LDR              R1, [R0]
+  119 00000066 460A            MOV              R2, R1
+  120 00000068 F022 02FD       BIC              R2, #0xFD   ; isolate switch bi
                                                             t (PE1)
-  121 00000070 2A00            CMP              R2, #0
-  122 00000072 D102            BNE              switch_on
-  123 00000074 F041 0101       ORR              R1, #0x01
-  124 00000078 E001            B                done
-  125 0000007A         switch_on
-  126 0000007A F081 0101       EOR              R1, #0x01
-  127 0000007E         done
-  128 0000007E 6001            STR              R1, [R0]
-  129 00000080         
-  130 00000080 4832            LDR              R0, =GPIO_PORTF_DATA_R
-  131 00000082 6801            LDR              R1, [R0]
-  132 00000084 F081 0104       EOR              R1, #0x04
-  133 00000088 6001            STR              R1, [R0]
-  134 0000008A         
-  135 0000008A         ;heartbeat
-  136 0000008A         ; Delay       count down from 1,250,000 - 0.0625s
-  137 0000008A 4831            LDR              R0, =COUNT
-  138 0000008C         again
-  139 0000008C 3801            SUBS             R0, #1
-  140 0000008E D1FD            BNE              again
-  141 00000090         
-  142 00000090 E7E7            B                loop
-  143 00000092         
-  144 00000092         
-  145 00000092         ;------------Debug_Init------------
-  146 00000092         ; Initializes the debugging instrument
-  147 00000092         ; Input: none
-  148 00000092         ; Output: none
-  149 00000092         ; Modifies: none
-  150 00000092         ; Note: push/pop an even number of registers so C compil
+  121 0000006C 2A00            CMP              R2, #0
+  122 0000006E D102            BNE              switch_on
+  123 00000070 F041 0101       ORR              R1, #0x01
+  124 00000074 E001            B                done
+  125 00000076         switch_on
+  126 00000076 F081 0101       EOR              R1, #0x01
+  127 0000007A         done
+  128 0000007A 6001            STR              R1, [R0]
+  129 0000007C         
+  130 0000007C F000 F830       BL               Debug_Capture
+  131 00000080         
+  132 00000080 4832            LDR              R0, =GPIO_PORTF_DATA_R
+  133 00000082 6801            LDR              R1, [R0]
+  134 00000084 F081 0104       EOR              R1, #0x04
+  135 00000088 6001            STR              R1, [R0]
+  136 0000008A         
+  137 0000008A         ;heartbeat
+  138 0000008A         ; Delay       count down from 1,250,000 - 0.0625s
+  139 0000008A 4831            LDR              R0, =COUNT
+  140 0000008C         again
+  141 0000008C 3801            SUBS             R0, #1
+  142 0000008E D1FD            BNE              again
+  143 00000090         
+  144 00000090 E7E7            B                loop
+  145 00000092         
+  146 00000092         
+  147 00000092         ;------------Debug_Init------------
+  148 00000092         ; Initializes the debugging instrument
+  149 00000092         ; Input: none
+  150 00000092         ; Output: none
+  151 00000092         ; Modifies: none
+  152 00000092         ; Note: push/pop an even number of registers so C compil
                        er is happy
-  151 00000092         Debug_Init
-  152 00000092         ; set buffers to 0xFFFFFFFF 
-  153 00000092 F04F 0032       MOV              R0, #50     ; set count equal t
+  153 00000092         Debug_Init
+  154 00000092         ; set buffers to 0xFFFFFFFF 
+  155 00000092 F04F 0032       MOV              R0, #50     ; set count equal t
                                                             o number of element
                                                             s in array
-  154 00000096 492F            LDR              R1, =DataBuffer ; R1 <- startin
+  156 00000096 492F            LDR              R1, =DataBuffer ; R1 <- startin
                                                             g address of data a
                                                             rray
-  155 00000098 4A2F            LDR              R2, =TimeBuffer ; R2 <- startin
+  157 00000098 4A2F            LDR              R2, =TimeBuffer ; R2 <- startin
                                                             g address of time a
                                                             rray
-  156 0000009A F04F 33FF       MOV              R3, #0xFFFFFFFF ; R3 <- data we
-                                                            'll be storing
 
 
 
 ARM Macro Assembler    Page 7 
 
 
-  157 0000009E 2800    lp      CMP              R0, #0      ; reached end of ar
+  158 0000009A F04F 33FF       MOV              R3, #0xFFFFFFFF ; R3 <- data we
+                                                            'll be storing
+  159 0000009E 2800    lp      CMP              R0, #0      ; reached end of ar
                                                             ray?
-  158 000000A0 D008            BEQ              L1          ; if yes, end loop
-  159 000000A2 600B            STR              R3, [R1]    ; otherwise store t
+  160 000000A0 D008            BEQ              L1          ; if yes, end loop
+  161 000000A2 600B            STR              R3, [R1]    ; otherwise store t
                                                             he data into the ad
                                                             dress held by R1 (c
                                                             urrent DATA array a
                                                             ddress)
-  160 000000A4 6013            STR              R3, [R2]    ; store the data in
+  162 000000A4 6013            STR              R3, [R2]    ; store the data in
                                                             to the address held
                                                              by R2 (current TIM
                                                             E array address)
-  161 000000A6 F101 0104       ADD              R1, #4      ; increment data ar
+  163 000000A6 F101 0104       ADD              R1, #4      ; increment data ar
                                                             ray pointer to next
                                                              element
-  162 000000AA F102 0204       ADD              R2, #4      ; increment time ar
+  164 000000AA F102 0204       ADD              R2, #4      ; increment time ar
                                                             ray pointer to next
                                                              element
-  163 000000AE F1A0 0001       SUB              R0, #1      ; subtract 1 from c
+  165 000000AE F1A0 0001       SUB              R0, #1      ; subtract 1 from c
                                                             ount
-  164 000000B2 E7F4            B                lp
-  165 000000B4         
-  166 000000B4         ; initialize pointers
-  167 000000B4 4829    L1      LDR              R0, =DataPt ; get address of da
+  166 000000B2 E7F4            B                lp
+  167 000000B4         
+  168 000000B4         ; initialize pointers
+  169 000000B4 4829    L1      LDR              R0, =DataPt ; get address of da
                                                             ta pointer
-  168 000000B6 4927            LDR              R1, =DataBuffer ; get address o
+  170 000000B6 4927            LDR              R1, =DataBuffer ; get address o
                                                             f first element
-  169 000000B8 6001            STR              R1, [R0]    ; store address of 
+  171 000000B8 6001            STR              R1, [R0]    ; store address of 
                                                             first element in po
                                                             inter address
-  170 000000BA         
-  171 000000BA 4829            LDR              R0, =TimePt ; get address of ti
+  172 000000BA         
+  173 000000BA 4829            LDR              R0, =TimePt ; get address of ti
                                                             me pointer
-  172 000000BC 4926            LDR              R1, =TimeBuffer ; get address o
+  174 000000BC 4926            LDR              R1, =TimeBuffer ; get address o
                                                             f first element
-  173 000000BE 6001            STR              R1, [R0]    ; store address of 
+  175 000000BE 6001            STR              R1, [R0]    ; store address of 
                                                             first element in po
                                                             inter address
-  174 000000C0         
-  175 000000C0         ; init SysTick
-  176 000000C0         ; disable SysTick during setup
-  177 000000C0 4928            LDR              R1, =NVIC_ST_CTRL_R ; R1 = &NVI
+  176 000000C0         
+  177 000000C0         ; init SysTick
+  178 000000C0         ; disable SysTick during setup
+  179 000000C0 4928            LDR              R1, =NVIC_ST_CTRL_R ; R1 = &NVI
                                                             C_ST_CTRL_R
-  178 000000C2 F04F 0000       MOV              R0, #0      ; R0 = 0
-  179 000000C6 6008            STR              R0, [R1]    ; [R1] = R0 = 0
-  180 000000C8         ; maximum reload value
-  181 000000C8 4927            LDR              R1, =NVIC_ST_RELOAD_R ; R1 = &N
+  180 000000C2 F04F 0000       MOV              R0, #0      ; R0 = 0
+  181 000000C6 6008            STR              R0, [R1]    ; [R1] = R0 = 0
+  182 000000C8         ; maximum reload value
+  183 000000C8 4927            LDR              R1, =NVIC_ST_RELOAD_R ; R1 = &N
                                                             VIC_ST_RELOAD_R
-  182 000000CA 4828            LDR              R0, =0x00FFFFFF ; R0 = NVIC_ST_
+  184 000000CA 4828            LDR              R0, =0x00FFFFFF ; R0 = NVIC_ST_
                                                             RELOAD_M
-  183 000000CC 6008            STR              R0, [R1]    ; [R1] = R0 = NVIC_
+  185 000000CC 6008            STR              R0, [R1]    ; [R1] = R0 = NVIC_
                                                             ST_RELOAD_M
-  184 000000CE         ; any write to current clears it
-  185 000000CE 4928            LDR              R1, =NVIC_ST_CURRENT_R ; R1 = &
+  186 000000CE         ; any write to current clears it
+  187 000000CE 4928            LDR              R1, =NVIC_ST_CURRENT_R ; R1 = &
                                                             NVIC_ST_CURRENT_R
-  186 000000D0 F04F 0000       MOV              R0, #0      ; R0 = 0
-  187 000000D4 6008            STR              R0, [R1]    ; [R1] = R0 = 0
-  188 000000D6         ; enable SysTick with core clock
-  189 000000D6 4923            LDR              R1, =NVIC_ST_CTRL_R ; R1 = &NVI
+  188 000000D0 F04F 0000       MOV              R0, #0      ; R0 = 0
+  189 000000D4 6008            STR              R0, [R1]    ; [R1] = R0 = 0
 
 
 
 ARM Macro Assembler    Page 8 
 
 
+  190 000000D6         ; enable SysTick with core clock
+  191 000000D6 4923            LDR              R1, =NVIC_ST_CTRL_R ; R1 = &NVI
                                                             C_ST_CTRL_R
-  190 000000D8 F04F 0005       MOV              R0, #0x05
-  191 000000DC 6008            STR              R0, [R1]    ; [R1] = R0 = (NVIC
+  192 000000D8 F04F 0005       MOV              R0, #0x05
+  193 000000DC 6008            STR              R0, [R1]    ; [R1] = R0 = (NVIC
                                                             _ST_CTRL_ENABLE|NVI
                                                             C_ST_CTRL_CLK_SRC)
-  192 000000DE 4770            BX               LR
-  193 000000E0         
-  194 000000E0         ;------------Debug_Capture------------
-  195 000000E0         ; Dump Port E and time into buffers
-  196 000000E0         ; Input: none
-  197 000000E0         ; Output: none
-  198 000000E0         ; Modifies: none
-  199 000000E0         ; Note: push/pop an even number of registers so C compil
+  194 000000DE 4770            BX               LR
+  195 000000E0         
+  196 000000E0         ;------------Debug_Capture------------
+  197 000000E0         ; Dump Port E and time into buffers
+  198 000000E0         ; Input: none
+  199 000000E0         ; Output: none
+  200 000000E0         ; Modifies: none
+  201 000000E0         ; Note: push/pop an even number of registers so C compil
                        er is happy
-  200 000000E0         Debug_Capture
-  201 000000E0 E92D 107F       PUSH             {R0, R1, R2, R3, R4, R5, R6, R1
+  202 000000E0         Debug_Capture
+  203 000000E0 E92D 107F       PUSH             {R0, R1, R2, R3, R4, R5, R6, R1
 2} 
                                                             ; push needed regis
                                                             ters to stack (R6 n
@@ -482,87 +484,87 @@ ARM Macro Assembler    Page 8
                                                             but has to be even 
                                                             number of registers
                                                             )
-  202 000000E4 481D            LDR              R0, =DataPt ; R0 <- address of 
+  204 000000E4 481D            LDR              R0, =DataPt ; R0 <- address of 
                                                             data array pointer 
                                                             to element
-  203 000000E6 491E            LDR              R1, =TimePt ; R1 <- address of 
+  205 000000E6 491E            LDR              R1, =TimePt ; R1 <- address of 
                                                             time array pointer 
                                                             to element
-  204 000000E8 6802            LDR              R2, [R0]    ; R2 <- data array 
+  206 000000E8 6802            LDR              R2, [R0]    ; R2 <- data array 
                                                             pointer to element
-  205 000000EA 680B            LDR              R3, [R1]    ; R3 <- time array 
+  207 000000EA 680B            LDR              R3, [R1]    ; R3 <- time array 
                                                             pointer to element
-  206 000000EC 4C1A            LDR              R4, =TimeBuffer ; R4 <- startin
+  208 000000EC 4C1A            LDR              R4, =TimeBuffer ; R4 <- startin
                                                             g address of array
-  207 000000EE F104 04C8       ADD              R4, #200    ; add 50 to get the
+  209 000000EE F104 04C8       ADD              R4, #200    ; add 50 to get the
                                                              ending address of 
                                                             the array
-  208 000000F2 42A3            CMP              R3, R4      ; check to see if w
+  210 000000F2 42A3            CMP              R3, R4      ; check to see if w
                                                             e have gone past th
                                                             e bounds of the arr
                                                             ay
-  209 000000F4 DC18            BGT              L2          ; if yes then retur
+  211 000000F4 D018            BEQ              L2          ; if yes then retur
                                                             n
-  210 000000F6         
-  211 000000F6 4C14            LDR              R4, =GPIO_PORTE_DATA_R ; R4 <- 
+  212 000000F6         
+  213 000000F6 4C14            LDR              R4, =GPIO_PORTE_DATA_R ; R4 <- 
                                                             PORT E data address
                                                             
-  212 000000F8 6825            LDR              R5, [R4]    ; R5 <- PORT E data
+  214 000000F8 6825            LDR              R5, [R4]    ; R5 <- PORT E data
                                                             
-  213 000000FA F025 05FC       BIC              R5, #0xFC   ; mask everything e
+  215 000000FA F025 05FC       BIC              R5, #0xFC   ; mask everything e
                                                             xcept PE0 and PE1
-  214 000000FE 46AC            MOV              R12, R5     ; create a copy of 
+  216 000000FE 46AC            MOV              R12, R5     ; create a copy of 
                                                             the data into R12
-  215 00000100 F02C 0C01       BIC              R12, #0x01  ; clear everything 
+  217 00000100 F02C 0C01       BIC              R12, #0x01  ; clear everything 
                                                             but PE1
-  216 00000104 EA4F 0CCC       LSL              R12, #3     ; shift PE1 by 3 bi
-                                                            ts
-  217 00000108 EA4C 0505       ORR              R5, R12, R5 ; store the result 
+  218 00000104 EA4F 0CCC       LSL              R12, #3     ; shift PE1 by 3 bi
 
 
 
 ARM Macro Assembler    Page 9 
 
 
+                                                            ts
+  219 00000108 EA4C 0505       ORR              R5, R12, R5 ; store the result 
                                                             back into R5
-  218 0000010C F025 05EE       BIC              R5, #0xEE   ; get rid of the or
+  220 0000010C F025 05EE       BIC              R5, #0xEE   ; get rid of the or
                                                             iginal PE1 that was
                                                              in bit 1
-  219 00000110 6015            STR              R5, [R2]    ; store data into d
+  221 00000110 6015            STR              R5, [R2]    ; store data into d
                                                             ata array
-  220 00000112         
-  221 00000112 4C17            LDR              R4, =NVIC_ST_CURRENT_R ; R2 <- 
+  222 00000112         
+  223 00000112 4C17            LDR              R4, =NVIC_ST_CURRENT_R ; R2 <- 
                                                             current clock time 
                                                             address
-  222 00000114 6825            LDR              R5, [R4]    ; R4 <- current clo
+  224 00000114 6825            LDR              R5, [R4]    ; R4 <- current clo
                                                             ck time
-  223 00000116 601D            STR              R5, [R3]    ; store current tim
+  225 00000116 601D            STR              R5, [R3]    ; store current tim
                                                             e into the time arr
                                                             ay - hopefully - no
                                                             t sure this works
-  224 00000118         
-  225 00000118 F102 0204       ADD              R2, #4      ; increment pointer
+  226 00000118         
+  227 00000118 F102 0204       ADD              R2, #4      ; increment pointer
                                                             s 
-  226 0000011C F103 0304       ADD              R3, #4
-  227 00000120 6002            STR              R2, [R0]    ; store updated poi
+  228 0000011C F103 0304       ADD              R3, #4
+  229 00000120 6002            STR              R2, [R0]    ; store updated poi
                                                             nters back into the
                                                              variables
-  228 00000122 600B            STR              R3, [R1]
-  229 00000124         
-  230 00000124 E8BD 107F       POP              {R0, R1, R2, R3, R4, R5, R6, R1
+  230 00000122 600B            STR              R3, [R1]
+  231 00000124         
+  232 00000124 E8BD 107F       POP              {R0, R1, R2, R3, R4, R5, R6, R1
 2}
-  231 00000128         
-  232 00000128         
-  233 00000128 4770    L2      BX               LR          ; debug_capture - 2
+  233 00000128         
+  234 00000128         
+  235 00000128 4770    L2      BX               LR          ; debug_capture - 2
                                                             5 lines or 50 cycle
                                                             s - 6.25 * 10^-7 se
                                                             conds
-  234 0000012A         
-  235 0000012A         
-  236 0000012A 00 00           ALIGN                        ; make sure the end
+  236 0000012A         
+  237 0000012A         
+  238 0000012A 00 00           ALIGN                        ; make sure the end
                                                              of this section is
                                                              aligned
-  237 0000012C                 END                          ; end of file
+  239 0000012C                 END                          ; end of file
               400FE608 
               40024400 
               40024420 
@@ -581,14 +583,14 @@ ARM Macro Assembler    Page 9
               E000E014 
               00FFFFFF 
               E000E018 
-Command Line: --debug --xref --cpu=Cortex-M4 --apcs=interwork --depend=.\main.d
- -o.\main.o -IC:\Keil\ARM\RV31\INC -IC:\Keil\ARM\CMSIS\Include -IC:\Keil\ARM\In
 
 
 
 ARM Macro Assembler    Page 10 
 
 
+Command Line: --debug --xref --cpu=Cortex-M4 --apcs=interwork --depend=.\main.d
+ -o.\main.o -IC:\Keil\ARM\RV31\INC -IC:\Keil\ARM\CMSIS\Include -IC:\Keil\ARM\In
 c\Luminary --predefine="__RTX SETA 1" --predefine="__EVAL SETA 1" --list=.\main
 .lst main.s
 
@@ -612,8 +614,8 @@ Symbol: DataBuffer
       At line 54 in file main.s
    Uses
       At line 50 in file main.s
-      At line 154 in file main.s
-      At line 168 in file main.s
+      At line 156 in file main.s
+      At line 170 in file main.s
 
 DataPt 00000190
 
@@ -622,8 +624,8 @@ Symbol: DataPt
       At line 56 in file main.s
    Uses
       At line 52 in file main.s
-      At line 167 in file main.s
-      At line 202 in file main.s
+      At line 169 in file main.s
+      At line 204 in file main.s
 
 TimeBuffer 000000C8
 
@@ -632,9 +634,9 @@ Symbol: TimeBuffer
       At line 55 in file main.s
    Uses
       At line 51 in file main.s
-      At line 155 in file main.s
-      At line 172 in file main.s
-      At line 206 in file main.s
+      At line 157 in file main.s
+      At line 174 in file main.s
+      At line 208 in file main.s
 
 TimePt 00000194
 
@@ -643,8 +645,8 @@ Symbol: TimePt
       At line 57 in file main.s
    Uses
       At line 53 in file main.s
-      At line 171 in file main.s
-      At line 203 in file main.s
+      At line 173 in file main.s
+      At line 205 in file main.s
 
 5 symbols
 
@@ -665,15 +667,15 @@ Debug_Capture 000000E0
 
 Symbol: Debug_Capture
    Definitions
-      At line 200 in file main.s
+      At line 202 in file main.s
    Uses
-      At line 115 in file main.s
+      At line 130 in file main.s
 Comment: Debug_Capture used once
 Debug_Init 00000092
 
 Symbol: Debug_Init
    Definitions
-      At line 151 in file main.s
+      At line 153 in file main.s
    Uses
       At line 106 in file main.s
 Comment: Debug_Init used once
@@ -681,17 +683,17 @@ L1 000000B4
 
 Symbol: L1
    Definitions
-      At line 167 in file main.s
+      At line 169 in file main.s
    Uses
-      At line 158 in file main.s
+      At line 160 in file main.s
 Comment: L1 used once
 L2 00000128
 
 Symbol: L2
    Definitions
-      At line 233 in file main.s
+      At line 235 in file main.s
    Uses
-      At line 209 in file main.s
+      At line 211 in file main.s
 Comment: L2 used once
 Start 00000000
 
@@ -705,11 +707,11 @@ again 0000008C
 
 Symbol: again
    Definitions
-      At line 138 in file main.s
-   Uses
       At line 140 in file main.s
+   Uses
+      At line 142 in file main.s
 Comment: again used once
-done 0000007E
+done 0000007A
 
 Symbol: done
 
@@ -729,17 +731,17 @@ Symbol: loop
    Definitions
       At line 114 in file main.s
    Uses
-      At line 142 in file main.s
+      At line 144 in file main.s
 Comment: loop used once
 lp 0000009E
 
 Symbol: lp
    Definitions
-      At line 157 in file main.s
+      At line 159 in file main.s
    Uses
-      At line 164 in file main.s
+      At line 166 in file main.s
 Comment: lp used once
-switch_on 0000007A
+switch_on 00000076
 
 Symbol: switch_on
    Definitions
@@ -760,7 +762,7 @@ Symbol: COUNT
    Definitions
       At line 43 in file main.s
    Uses
-      At line 137 in file main.s
+      At line 139 in file main.s
 Comment: COUNT used once
 GPIO_PORTE_AFSEL_R 40024420
 
@@ -778,7 +780,7 @@ Symbol: GPIO_PORTE_DATA_R
    Uses
       At line 109 in file main.s
       At line 117 in file main.s
-      At line 211 in file main.s
+      At line 213 in file main.s
 
 GPIO_PORTE_DEN_R 4002451C
 
@@ -824,7 +826,7 @@ Symbol: GPIO_PORTF_DATA_R
    Definitions
       At line 36 in file main.s
    Uses
-      At line 130 in file main.s
+      At line 132 in file main.s
 Comment: GPIO_PORTF_DATA_R used once
 GPIO_PORTF_DEN_R 4002551C
 
@@ -856,8 +858,8 @@ Symbol: NVIC_ST_CTRL_R
    Definitions
       At line 40 in file main.s
    Uses
-      At line 177 in file main.s
-      At line 189 in file main.s
+      At line 179 in file main.s
+      At line 191 in file main.s
 
 NVIC_ST_CURRENT_R E000E018
 
@@ -865,8 +867,8 @@ Symbol: NVIC_ST_CURRENT_R
    Definitions
       At line 42 in file main.s
    Uses
-      At line 185 in file main.s
-      At line 221 in file main.s
+      At line 187 in file main.s
+      At line 223 in file main.s
 
 NVIC_ST_RELOAD_R E000E014
 
@@ -874,7 +876,7 @@ Symbol: NVIC_ST_RELOAD_R
    Definitions
       At line 41 in file main.s
    Uses
-      At line 181 in file main.s
+      At line 183 in file main.s
 Comment: NVIC_ST_RELOAD_R used once
 SIZE 00000032
 
