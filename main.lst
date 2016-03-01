@@ -442,23 +442,27 @@ ARM Macro Assembler    Page 7
   174 000000B2         ; Note: push/pop an even number of registers so C compil
                        er is happy
   175 000000B2         Debug_Capture
-  176 000000B2 E92D 101F       PUSH             {R0, R1, R2, R3, R4, R12} ; pus
-                                                            h needed registers 
-                                                            to stack (R4 not ne
-                                                            eded but has to be 
-                                                            even number of regi
-                                                            sters)
-  177 000000B6 481B            LDR              R0, =DataPt ; R0 <- data array 
-                                                            pointer to element
-  178 000000B8 491B            LDR              R1, =TimePt ; R1 <- time array 
-                                                            pointer to element
-  179 000000BA 6802            LDR              R2, [R0]    ; R2 <- data array 
+  176 000000B2 E92D 107F       PUSH             {R0, R1, R2, R3, R4, R5, R6, R1
+2} 
+                                                            ; push needed regis
+                                                            ters to stack (R6 n
+                                                            ot actually needed 
+                                                            but has to be even 
+                                                            number of registers
+                                                            )
+  177 000000B6 481B            LDR              R0, =DataPt ; R0 <- address of 
+                                                            data array pointer 
+                                                            to element
 
 
 
 ARM Macro Assembler    Page 8 
 
 
+  178 000000B8 491B            LDR              R1, =TimePt ; R1 <- address of 
+                                                            time array pointer 
+                                                            to element
+  179 000000BA 6802            LDR              R2, [R0]    ; R2 <- data array 
                                                             pointer to element
   180 000000BC 680B            LDR              R3, [R1]    ; R3 <- time array 
                                                             pointer to element
@@ -474,33 +478,33 @@ ARM Macro Assembler    Page 8
   184 000000C6 DC18            BGT              L2          ; if yes then retur
                                                             n
   185 000000C8         
-  186 000000C8 4A1C            LDR              R2, =GPIO_PORTE_DATA_R ; R2 <- 
+  186 000000C8 4C1C            LDR              R4, =GPIO_PORTE_DATA_R ; R4 <- 
                                                             PORT E data address
                                                             
-  187 000000CA 6813            LDR              R3, [R2]    ; R3 <- PORT E data
+  187 000000CA 6825            LDR              R5, [R4]    ; R5 <- PORT E data
                                                             
-  188 000000CC F023 03FC       BIC              R3, #0xFC   ; mask everything e
+  188 000000CC F025 05FC       BIC              R5, #0xFC   ; mask everything e
                                                             xcept PE0 and PE1
-  189 000000D0 469C            MOV              R12, R3     ; create a copy of 
+  189 000000D0 46AC            MOV              R12, R5     ; create a copy of 
                                                             the data into R12
   190 000000D2 F02C 0C01       BIC              R12, #0x01  ; clear everything 
                                                             but PE1
   191 000000D6 EA4F 0CCC       LSL              R12, #3     ; shift PE1 by 3 bi
                                                             ts
-  192 000000DA EA4C 0303       ORR              R3, R12, R3 ; store the result 
-                                                            back into R3
-  193 000000DE F023 03EE       BIC              R3, #0xEE   ; get rid of the or
+  192 000000DA EA4C 0505       ORR              R5, R12, R5 ; store the result 
+                                                            back into R5
+  193 000000DE F025 05EE       BIC              R5, #0xEE   ; get rid of the or
                                                             iginal PE1 that was
                                                              in bit 1
-  194 000000E2 6003            STR              R3, [R0]    ; store data into d
+  194 000000E2 6015            STR              R5, [R2]    ; store data into d
                                                             ata array
   195 000000E4         
-  196 000000E4 4A14            LDR              R2, =NVIC_ST_CURRENT_R ; R2 <- 
+  196 000000E4 4C14            LDR              R4, =NVIC_ST_CURRENT_R ; R2 <- 
                                                             current clock time 
                                                             address
-  197 000000E6 6813            LDR              R3, [R2]    ; R3 <- current clo
+  197 000000E6 6825            LDR              R5, [R4]    ; R4 <- current clo
                                                             ck time
-  198 000000E8 600B            STR              R3, [R1]    ; store current tim
+  198 000000E8 601D            STR              R5, [R3]    ; store current tim
                                                             e into the time arr
                                                             ay - hopefully - no
                                                             t sure this works
@@ -513,17 +517,18 @@ ARM Macro Assembler    Page 8
                                                              variables
   203 000000F4 600B            STR              R3, [R1]
   204 000000F6         
-  205 000000F6 E8BD 101F       POP              {R0, R1, R2, R3, R4, R12}
-  206 000000FA         
-  207 000000FA         
-  208 000000FA 4770    L2      BX               LR
-  209 000000FC         
+  205 000000F6 E8BD 107F       POP              {R0, R1, R2, R3, R4, R5, R6, R1
 
 
 
 ARM Macro Assembler    Page 9 
 
 
+2}
+  206 000000FA         
+  207 000000FA         
+  208 000000FA 4770    L2      BX               LR
+  209 000000FC         
   210 000000FC         
   211 000000FC                 ALIGN                        ; make sure the end
                                                              of this section is

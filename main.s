@@ -173,9 +173,9 @@ L1	LDR R0, =DataPt					; get address of data pointer
 ; Modifies: none
 ; Note: push/pop an even number of registers so C compiler is happy
 Debug_Capture
-	PUSH {R0, R1, R2, R3, R4, R12}	; push needed registers to stack (R4 not needed but has to be even number of registers)
-	LDR R0, =DataPt					; R0 <- data array pointer to element
-	LDR R1, =TimePt					; R1 <- time array pointer to element
+	PUSH {R0, R1, R2, R3, R4, R5, R6, R12}	; push needed registers to stack (R6 not actually needed but has to be even number of registers)
+	LDR R0, =DataPt					; R0 <- address of data array pointer to element
+	LDR R1, =TimePt					; R1 <- address of time array pointer to element
 	LDR R2, [R0]					; R2 <- data array pointer to element
 	LDR R3, [R1]					; R3 <- time array pointer to element
 	LDR R4, =TimeBuffer				; R4 <- starting address of array
@@ -183,26 +183,26 @@ Debug_Capture
 	CMP R3, R4						; check to see if we have gone past the bounds of the array
 	BGT L2							; if yes then return
 	
-	LDR R2, =GPIO_PORTE_DATA_R		; R2 <- PORT E data address
-	LDR R3, [R2]					; R3 <- PORT E data
-	BIC R3, #0xFC					; mask everything except PE0 and PE1
-	MOV R12, R3						; create a copy of the data into R12
+	LDR R4, =GPIO_PORTE_DATA_R		; R4 <- PORT E data address
+	LDR R5, [R4]					; R5 <- PORT E data
+	BIC R5, #0xFC					; mask everything except PE0 and PE1
+	MOV R12, R5						; create a copy of the data into R12
 	BIC R12, #0x01					; clear everything but PE1
 	LSL R12, #3						; shift PE1 by 3 bits
-	ORR R3, R12, R3					; store the result back into R3
-	BIC R3, #0xEE					; get rid of the original PE1 that was in bit 1
-	STR R3, [R0]					; store data into data array
+	ORR R5, R12, R5					; store the result back into R5
+	BIC R5, #0xEE					; get rid of the original PE1 that was in bit 1
+	STR R5, [R2]					; store data into data array
 	
-	LDR R2, =NVIC_ST_CURRENT_R		; R2 <- current clock time address
-	LDR R3, [R2]					; R3 <- current clock time
-	STR R3, [R1]					; store current time into the time array - hopefully - not sure this works
+	LDR R4, =NVIC_ST_CURRENT_R		; R2 <- current clock time address
+	LDR R5, [R4]					; R4 <- current clock time
+	STR R5, [R3]					; store current time into the time array - hopefully - not sure this works
 	
 	ADD R2, #4						; increment pointers 
 	ADD R3, #4
 	STR R2, [R0]					; store updated pointers back into the variables
 	STR R3, [R1]
 	
-	POP {R0, R1, R2, R3, R4, R12}
+	POP {R0, R1, R2, R3, R4, R5, R6, R12}
 	
 
 L2    BX LR
