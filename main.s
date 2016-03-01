@@ -40,6 +40,7 @@ GPIO_PORTF_DEN_R        EQU 0x4002551C
 NVIC_ST_CTRL_R          EQU 0xE000E010
 NVIC_ST_RELOAD_R        EQU 0xE000E014
 NVIC_ST_CURRENT_R       EQU 0xE000E018
+COUNT					EQU 0x0003C8C0
            THUMB
            AREA    DATA, ALIGN=4
 SIZE       EQU    50
@@ -108,8 +109,12 @@ Start BL   TExaS_Init  ; running at 80 MHz, scope voltmeter on PD3
 loop  BL   Debug_Capture
 ;heartbeat
 ; Delay
-;input PE1 test output PE0
-	  B    loop
+	LDR R0, =COUNT
+again
+    SUBS R0, #1
+    BNE again
+	
+	B    loop
 
 
 ;------------Debug_Init------------
@@ -168,8 +173,35 @@ L1	LDR R0, =DataPt					; get address of data pointer
 ; Modifies: none
 ; Note: push/pop an even number of registers so C compiler is happy
 Debug_Capture
+	PUSH [R0, R1, R2, R3, R12]
+	LDR R0, =DataPt
+	LDR R1, =TimePt
+	LDR R2, =TimeBuffer
+	ADD R2, #200
+	CMP R1, R2
+	BGT L2
+	
+	LDR R2, =GPIO_PORTE_DATA_R
+	LDR R3, [R2]
+	BIC R3, #0xFC
+	MOV R12, R3
+	BIC R12, #0x01
+	LSL R12, #3
+	ORR R3, R12, R3
+	BIC R3, #0xEE
+	STR R3, [R0]
+	
+	LDR R2, =NVIC_ST_CURRENT_R
+	LDR R3, [R2]
+	STR R3, [R1]
+	
+	ADD R0, #4
+	ADD R1, #4
+	
+	POP [R0, R1, R2, R3, R12]
+	
 
-      BX LR
+L2    BX LR
 
 
     ALIGN                           ; make sure the end of this section is aligned
